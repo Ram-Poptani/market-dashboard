@@ -1,42 +1,168 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+:root {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: dark;
+  color: #e0e0e0;
+  background-color: #0f0f1a;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.card {
-  padding: 2em;
+.app-header {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 20px 30px;
+  border-bottom: 1px solid #2d2d4a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
-.read-the-docs {
+.app-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tab-navigation {
+  display: flex;
+  gap: 8px;
+}
+
+.tab-btn {
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: 1px solid #3d3d5c;
+  background: transparent;
   color: #888;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-btn:hover {
+  border-color: #00d4ff;
+  color: #e0e0e0;
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+  color: #0f0f1a;
+  border-color: transparent;
+  font-weight: 600;
+}
+
+.app-main {
+  flex: 1;
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.app-footer {
+  text-align: center;
+  padding: 15px;
+  color: #666;
+  font-size: 12px;
+  border-top: 1px solid #2d2d4a;
+  background: #1a1a2e;
+}
+
+/* Global button styles */
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+  color: #0f0f1a;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #00e5ff 0%, #00b8e6 100%);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: #3d3d5c;
+  color: #e0e0e0;
+}
+
+.btn-secondary:hover {
+  background: #4d4d6c;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a2e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3d3d5c;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4d4d6c;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .app-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .app-header h1 {
+    font-size: 20px;
+  }
+
+  .tab-navigation {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tab-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .app-main {
+    padding: 10px;
+  }
 }
