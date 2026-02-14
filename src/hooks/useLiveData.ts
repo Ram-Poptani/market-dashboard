@@ -1,108 +1,114 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { getLiveWebSocketUrl } from '../config/api';
-import type { LiveTradeData } from '../types';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { getLiveWebSocketUrl } from "../config/api";
+import type { LiveCandleData } from "../types";
 
 interface LiveDataPoint {
-  time: number;
-  price: number;
-  volume: number;
+	time: number;
+	open: number;
+	high: number;
+	low: number;
+	close: number;
+	volume: number;
+	tradeCount: number;
 }
 
 const MAX_DATA_POINTS = 100;
 
 export function useLiveData(symbol: string) {
-  const [data, setData] = useState<LiveDataPoint[]>([]);
-  const [isConnected, setIsConnected] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [lastTrade, setLastTrade] = useState<LiveTradeData | null>(null);
-  const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<number | null>(null);
+	const [data, setData] = useState<LiveDataPoint[]>([]);
+	const [isConnected, setIsConnected] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const [lastCandle, setLastCandle] = useState<LiveCandleData | null>(null);
+	const wsRef = useRef<WebSocket | null>(null);
+	const reconnectTimeoutRef = useRef<number | null>(null);
 
-  const connect = useCallback(() => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.close();
-    }
+	const connect = useCallback(() => {
+		if (wsRef.current?.readyState === WebSocket.OPEN) {
+			wsRef.current.close();
+		}
 
-    const wsUrl = getLiveWebSocketUrl(symbol);
-    const ws = new WebSocket(wsUrl);
-    wsRef.current = ws;
+		const wsUrl = getLiveWebSocketUrl(symbol);
+		const ws = new WebSocket(wsUrl);
+		wsRef.current = ws;
 
-    ws.onopen = () => {
-      setIsConnected(true);
-      setError(null);
-      console.log(`Connected to ${symbol} live data`);
-    };
+		ws.onopen = () => {
+			setIsConnected(true);
+			setError(null);
+			console.log(`Connected to ${symbol} live data`);
+		};
 
-    ws.onmessage = (event) => {
-      try {
-        const trade: LiveTradeData = JSON.parse(event.data);
-        setLastTrade(trade);
-        
-        const newPoint: LiveDataPoint = {
-          time: trade.T,
-          price: parseFloat(trade.p),
-          volume: parseFloat(trade.q),
-        };
+		ws.onmessage = (event) => {
+			try {
+				const candle: LiveCandleData = JSON.parse(event.data);
+				setLastCandle(candle);
 
-        setData((prev) => {
-          const updated = [...prev, newPoint];
-          // Keep only the last MAX_DATA_POINTS
-          if (updated.length > MAX_DATA_POINTS) {
-            return updated.slice(-MAX_DATA_POINTS);
-          }
-          return updated;
-        });
-      } catch (e) {
-        console.error('Failed to parse trade data:', e);
-      }
-    };
+				const newPoint: LiveDataPoint = {
+					time: candle.closeTime,
+					open: candle.open,
+					high: candle.high,
+					low: candle.low,
+					close: candle.close,
+					volume: candle.volume,
+					tradeCount: candle.tradeCount,
+				};
 
-    ws.onerror = () => {
-      setError('WebSocket connection error');
-      setIsConnected(false);
-    };
+				setData((prev) => {
+					const updated = [...prev, newPoint];
+					if (updated.length > MAX_DATA_POINTS) {
+						return updated.slice(-MAX_DATA_POINTS);
+					}
+					return updated;
+				});
+			} catch (e) {
+				console.error("Failed to parse candle data:", e);
+			}
+		};
 
-    ws.onclose = () => {
-      setIsConnected(false);
-      // Attempt to reconnect after 3 seconds
-      reconnectTimeoutRef.current = window.setTimeout(() => {
-        console.log('Attempting to reconnect...');
-        connect();
-      }, 3000);
-    };
-  }, [symbol]);
+		ws.onerror = () => {
+			setError("WebSocket connection error");
+			setIsConnected(false);
+		};
 
-  const disconnect = useCallback(() => {
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-      reconnectTimeoutRef.current = null;
-    }
-    if (wsRef.current) {
-      wsRef.current.close();
-      wsRef.current = null;
-    }
-    setIsConnected(false);
-  }, []);
+		ws.onclose = () => {
+			setIsConnected(false);
+			reconnectTimeoutRef.current = window.setTimeout(() => {
+				console.log("Attempting to reconnect...");
+				connect();
+			}, 3000);
+		};
+	}, [symbol]);
 
-  useEffect(() => {
-    setData([]); // Clear data when symbol changes
-    connect();
+	const disconnect = useCallback(() => {
+		if (reconnectTimeoutRef.current) {
+			clearTimeout(reconnectTimeoutRef.current);
+			reconnectTimeoutRef.current = null;
+		}
+		if (wsRef.current) {
+			wsRef.current.close();
+			wsRef.current = null;
+		}
+		setIsConnected(false);
+	}, []);
 
-    return () => {
-      disconnect();
-    };
-  }, [symbol, connect, disconnect]);
+	useEffect(() => {
+		setData([]);
+		connect();
 
-  const clearData = useCallback(() => {
-    setData([]);
-  }, []);
+		return () => {
+			disconnect();
+		};
+	}, [symbol, connect, disconnect]);
 
-  return {
-    data,
-    isConnected,
-    error,
-    lastTrade,
-    clearData,
-    reconnect: connect,
-  };
+	const clearData = useCallback(() => {
+		setData([]);
+	}, []);
+
+	return {
+		data,
+		isConnected,
+		error,
+		lastCandle,
+		clearData,
+		reconnect: connect,
+	};
 }
