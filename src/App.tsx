@@ -12,19 +12,24 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>📊 Binance Trading Dashboard</h1>
+        <div className="header-brand">
+          <div className="logo-icon">📊</div>
+          <h1>Market Data Platform</h1>
+          <span className="subtitle">Real-time & historical crypto analytics</span>
+        </div>
+
         <nav className="tab-navigation">
           <button
             className={`tab-btn ${activeTab === 'live' ? 'active' : ''}`}
             onClick={() => setActiveTab('live')}
           >
-            🔴 Live Data
+            <span className="tab-icon">⚡</span> Live
           </button>
           <button
             className={`tab-btn ${activeTab === 'historical' ? 'active' : ''}`}
             onClick={() => setActiveTab('historical')}
           >
-            📈 Historical Data
+            <span className="tab-icon">📈</span> Historical
           </button>
         </nav>
       </header>
@@ -39,7 +44,7 @@ function App() {
       </main>
 
       <footer className="app-footer">
-        <p>Data provided by Binance API • Built with React & Chart.js</p>
+        <span>Data provided by Binance API &bull; Built with React &amp; Chart.js</span>
       </footer>
     </div>
   );

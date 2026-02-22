@@ -71,9 +71,9 @@ export function PastDataChart({ initialSymbol = 'BTCUSDT' }: PastDataChartProps)
       {
         label: 'Close Price',
         data: data.map((d) => d.close),
-        borderColor: 'rgb(75, 192, 192)',
-        backgroundColor: 'rgba(75, 192, 192, 0.1)',
-        tension: 0.1,
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.08)',
+        tension: 0.3,
         fill: true,
         pointRadius: data.length > 100 ? 0 : 2,
         borderWidth: 2,
@@ -81,24 +81,24 @@ export function PastDataChart({ initialSymbol = 'BTCUSDT' }: PastDataChartProps)
       {
         label: 'High',
         data: data.map((d) => d.high),
-        borderColor: 'rgba(0, 255, 136, 0.5)',
+        borderColor: 'rgba(16, 185, 129, 0.5)',
         backgroundColor: 'transparent',
-        tension: 0.1,
+        tension: 0.3,
         fill: false,
         pointRadius: 0,
         borderWidth: 1,
-        borderDash: [5, 5],
+        borderDash: [4, 4],
       },
       {
         label: 'Low',
         data: data.map((d) => d.low),
-        borderColor: 'rgba(255, 68, 68, 0.5)',
+        borderColor: 'rgba(239, 68, 68, 0.5)',
         backgroundColor: 'transparent',
-        tension: 0.1,
+        tension: 0.3,
         fill: false,
         pointRadius: 0,
         borderWidth: 1,
-        borderDash: [5, 5],
+        borderDash: [4, 4],
       },
     ],
   };
@@ -110,12 +110,13 @@ export function PastDataChart({ initialSymbol = 'BTCUSDT' }: PastDataChartProps)
         label: 'Volume',
         data: data.map((d) => d.volume),
         backgroundColor: data.map((d) =>
-          d.close >= d.open ? 'rgba(0, 255, 136, 0.6)' : 'rgba(255, 68, 68, 0.6)'
+          d.close >= d.open ? 'rgba(16, 185, 129, 0.5)' : 'rgba(239, 68, 68, 0.5)'
         ),
         borderColor: data.map((d) =>
-          d.close >= d.open ? 'rgb(0, 255, 136)' : 'rgb(255, 68, 68)'
+          d.close >= d.open ? 'rgb(16, 185, 129)' : 'rgb(239, 68, 68)'
         ),
         borderWidth: 1,
+        borderRadius: 2,
       },
     ],
   };
@@ -131,18 +132,24 @@ export function PastDataChart({ initialSymbol = 'BTCUSDT' }: PastDataChartProps)
       legend: {
         position: 'top' as const,
         labels: {
-          color: '#e0e0e0',
+          color: '#9ca3af',
+          font: { family: "'Inter', sans-serif", size: 12 },
+          padding: 16,
+          usePointStyle: true,
+          pointStyleWidth: 8,
         },
       },
       title: {
-        display: true,
-        text: `${symbol} Historical Price (${tickSize})`,
-        font: {
-          size: 16,
-        },
-        color: '#e0e0e0',
+        display: false,
       },
       tooltip: {
+        backgroundColor: 'rgba(22, 22, 37, 0.95)',
+        borderColor: 'rgba(255,255,255,0.08)',
+        borderWidth: 1,
+        titleFont: { family: "'Inter', sans-serif", size: 12 },
+        bodyFont: { family: "'JetBrains Mono', monospace", size: 12 },
+        padding: 12,
+        cornerRadius: 8,
         callbacks: {
           label: (context) => {
             const idx = context.dataIndex;
@@ -156,7 +163,7 @@ export function PastDataChart({ initialSymbol = 'BTCUSDT' }: PastDataChartProps)
               ].join(' | ');
             }
             const y = context.parsed.y;
-            return y != null ? `${context.dataset.label}: $${y.toFixed(2)}` : '';
+            return y != null ? ` ${context.dataset.label}: $${y.toFixed(2)}` : '';
           },
         },
       },
@@ -165,31 +172,34 @@ export function PastDataChart({ initialSymbol = 'BTCUSDT' }: PastDataChartProps)
       x: {
         display: true,
         title: {
-          display: true,
-          text: 'Time',
-          color: '#e0e0e0',
+          display: false,
         },
         ticks: {
           maxTicksLimit: 12,
-          color: '#888',
+          color: '#6b7280',
+          font: { size: 11 },
         },
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          color: 'rgba(255, 255, 255, 0.04)',
         },
+        border: { color: 'rgba(255,255,255,0.06)' },
       },
       y: {
         display: true,
         title: {
           display: true,
           text: 'Price (USD)',
-          color: '#e0e0e0',
+          color: '#6b7280',
+          font: { size: 11, family: "'Inter', sans-serif" },
         },
         ticks: {
-          color: '#888',
+          color: '#6b7280',
+          font: { size: 11, family: "'JetBrains Mono', monospace" },
         },
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          color: 'rgba(255, 255, 255, 0.04)',
         },
+        border: { color: 'rgba(255,255,255,0.06)' },
       },
     },
   };
@@ -202,12 +212,7 @@ export function PastDataChart({ initialSymbol = 'BTCUSDT' }: PastDataChartProps)
         display: false,
       },
       title: {
-        display: true,
-        text: 'Volume',
-        font: {
-          size: 14,
-        },
-        color: '#e0e0e0',
+        display: false,
       },
     },
     scales: {
@@ -215,20 +220,30 @@ export function PastDataChart({ initialSymbol = 'BTCUSDT' }: PastDataChartProps)
         display: true,
         ticks: {
           maxTicksLimit: 12,
-          color: '#888',
+          color: '#6b7280',
+          font: { size: 11 },
         },
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          color: 'rgba(255, 255, 255, 0.04)',
         },
+        border: { color: 'rgba(255,255,255,0.06)' },
       },
       y: {
         display: true,
+        title: {
+          display: true,
+          text: 'Volume',
+          color: '#6b7280',
+          font: { size: 11, family: "'Inter', sans-serif" },
+        },
         ticks: {
-          color: '#888',
+          color: '#6b7280',
+          font: { size: 11 },
         },
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          color: 'rgba(255, 255, 255, 0.04)',
         },
+        border: { color: 'rgba(255,255,255,0.06)' },
       },
     },
   };

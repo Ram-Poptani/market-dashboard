@@ -60,9 +60,9 @@ export function LiveChart({ symbol, onSymbolChange }: LiveChartProps) {
 			{
 				label: "Close",
 				data: data.map((d) => d.close),
-				borderColor: "rgb(75, 192, 192)",
-				backgroundColor: "rgba(75, 192, 192, 0.1)",
-				tension: 0.1,
+				borderColor: "#3b82f6",
+				backgroundColor: "rgba(59, 130, 246, 0.08)",
+				tension: 0.3,
 				fill: true,
 				pointRadius: 0,
 				borderWidth: 2,
@@ -70,24 +70,24 @@ export function LiveChart({ symbol, onSymbolChange }: LiveChartProps) {
 			{
 				label: "High",
 				data: data.map((d) => d.high),
-				borderColor: "rgba(0, 255, 136, 0.4)",
+				borderColor: "rgba(16, 185, 129, 0.4)",
 				backgroundColor: "transparent",
-				tension: 0.1,
+				tension: 0.3,
 				fill: false,
 				pointRadius: 0,
 				borderWidth: 1,
-				borderDash: [5, 5],
+				borderDash: [4, 4],
 			},
 			{
 				label: "Low",
 				data: data.map((d) => d.low),
-				borderColor: "rgba(255, 68, 68, 0.4)",
+				borderColor: "rgba(239, 68, 68, 0.4)",
 				backgroundColor: "transparent",
-				tension: 0.1,
+				tension: 0.3,
 				fill: false,
 				pointRadius: 0,
 				borderWidth: 1,
-				borderDash: [5, 5],
+				borderDash: [4, 4],
 			},
 		],
 	};
@@ -103,20 +103,30 @@ export function LiveChart({ symbol, onSymbolChange }: LiveChartProps) {
 		plugins: {
 			legend: {
 				position: "top" as const,
-			},
-			title: {
-				display: true,
-				text: `Live ${symbol} Price`,
-				font: {
-					size: 16,
+				labels: {
+					color: "#9ca3af",
+					font: { family: "'Inter', sans-serif", size: 12 },
+					padding: 16,
+					usePointStyle: true,
+					pointStyleWidth: 8,
 				},
 			},
+			title: {
+				display: false,
+			},
 			tooltip: {
+				backgroundColor: "rgba(22, 22, 37, 0.95)",
+				borderColor: "rgba(255,255,255,0.08)",
+				borderWidth: 1,
+				titleFont: { family: "'Inter', sans-serif", size: 12 },
+				bodyFont: { family: "'JetBrains Mono', monospace", size: 12 },
+				padding: 12,
+				cornerRadius: 8,
 				callbacks: {
 					label: (context) => {
 						const y = context.parsed.y;
 						if (y == null) return "";
-						return `${context.dataset.label}: $${y.toFixed(2)}`;
+						return ` ${context.dataset.label}: $${y.toFixed(2)}`;
 					},
 				},
 			},
@@ -125,19 +135,34 @@ export function LiveChart({ symbol, onSymbolChange }: LiveChartProps) {
 			x: {
 				display: true,
 				title: {
-					display: true,
-					text: "Time",
+					display: false,
 				},
 				ticks: {
 					maxTicksLimit: 10,
+					color: "#6b7280",
+					font: { size: 11 },
 				},
+				grid: {
+					color: "rgba(255, 255, 255, 0.04)",
+				},
+				border: { color: "rgba(255,255,255,0.06)" },
 			},
 			y: {
 				display: true,
 				title: {
 					display: true,
 					text: "Price (USD)",
+					color: "#6b7280",
+					font: { size: 11, family: "'Inter', sans-serif" },
 				},
+				ticks: {
+					color: "#6b7280",
+					font: { size: 11, family: "'JetBrains Mono', monospace" },
+				},
+				grid: {
+					color: "rgba(255, 255, 255, 0.04)",
+				},
+				border: { color: "rgba(255,255,255,0.06)" },
 			},
 		},
 	};
@@ -181,18 +206,30 @@ export function LiveChart({ symbol, onSymbolChange }: LiveChartProps) {
 
 			{lastCandle && (
 				<div className="last-trade">
-					<span className="trade-price">
-						O: ${lastCandle.open.toFixed(2)} H: $
-						{lastCandle.high.toFixed(2)} L: $
-						{lastCandle.low.toFixed(2)} C: $
-						{lastCandle.close.toFixed(2)}
-					</span>
-					<span className="trade-volume">
-						Vol: {lastCandle.volume.toFixed(4)}
-					</span>
-					<span className="trade-type buy">
-						{lastCandle.tradeCount} trades
-					</span>
+					<div className="ohlc-item">
+						<span className="ohlc-label">Open</span>
+						<span className="ohlc-value open">${lastCandle.open.toFixed(2)}</span>
+					</div>
+					<div className="ohlc-item">
+						<span className="ohlc-label">High</span>
+						<span className="ohlc-value high">${lastCandle.high.toFixed(2)}</span>
+					</div>
+					<div className="ohlc-item">
+						<span className="ohlc-label">Low</span>
+						<span className="ohlc-value low">${lastCandle.low.toFixed(2)}</span>
+					</div>
+					<div className="ohlc-item">
+						<span className="ohlc-label">Close</span>
+						<span className="ohlc-value close">${lastCandle.close.toFixed(2)}</span>
+					</div>
+					<div className="ohlc-item ohlc-meta">
+						<span className="ohlc-label">Volume</span>
+						<span className="ohlc-value">{lastCandle.volume.toFixed(4)}</span>
+					</div>
+					<div className="ohlc-item ohlc-meta">
+						<span className="ohlc-label">Trades</span>
+						<span className="ohlc-value">{lastCandle.tradeCount.toLocaleString()}</span>
+					</div>
 				</div>
 			)}
 
