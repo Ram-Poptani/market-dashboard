@@ -21,12 +21,14 @@ export function useLiveData(symbol: string) {
 	const [lastCandle, setLastCandle] = useState<LiveCandleData | null>(null);
 	const wsRef = useRef<WebSocket | null>(null);
 	const reconnectTimeoutRef = useRef<number | null>(null);
+	const shouldReconnectRef = useRef(true);
 
 	const connect = useCallback(() => {
 		if (wsRef.current?.readyState === WebSocket.OPEN) {
 			wsRef.current.close();
 		}
 
+		shouldReconnectRef.current = true;
 		const wsUrl = getLiveWebSocketUrl(symbol);
 		const ws = new WebSocket(wsUrl);
 		wsRef.current = ws;
@@ -71,6 +73,7 @@ export function useLiveData(symbol: string) {
 
 		ws.onclose = () => {
 			setIsConnected(false);
+			if (!shouldReconnectRef.current) return;
 			reconnectTimeoutRef.current = window.setTimeout(() => {
 				console.log("Attempting to reconnect...");
 				connect();
@@ -79,6 +82,7 @@ export function useLiveData(symbol: string) {
 	}, [symbol]);
 
 	const disconnect = useCallback(() => {
+		shouldReconnectRef.current = false;
 		if (reconnectTimeoutRef.current) {
 			clearTimeout(reconnectTimeoutRef.current);
 			reconnectTimeoutRef.current = null;
