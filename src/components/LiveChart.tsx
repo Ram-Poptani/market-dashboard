@@ -34,35 +34,35 @@ export function LiveChart({ symbol, onSymbolChange }: LiveChartProps) {
     const chart = createChart(chartContainerRef.current, {
       layout: {
         background: { type: ColorType.Solid, color: 'transparent' },
-        textColor: '#9ca3af',
+        textColor: '#4b5563',
         fontFamily: "'Inter', -apple-system, sans-serif",
         fontSize: 12,
       },
       grid: {
-        vertLines: { color: 'rgba(255, 255, 255, 0.04)', style: LineStyle.Dotted },
-        horzLines: { color: 'rgba(255, 255, 255, 0.04)', style: LineStyle.Dotted },
+        vertLines: { color: 'rgba(0, 0, 0, 0.05)', style: LineStyle.Dotted },
+        horzLines: { color: 'rgba(0, 0, 0, 0.05)', style: LineStyle.Dotted },
       },
       crosshair: {
         mode: CrosshairMode.Normal,
         vertLine: {
-          color: 'rgba(59, 130, 246, 0.4)',
+          color: 'rgba(22, 163, 74, 0.4)',
           width: 1,
           style: LineStyle.Dashed,
-          labelBackgroundColor: '#3b82f6',
+          labelBackgroundColor: '#16a34a',
         },
         horzLine: {
-          color: 'rgba(59, 130, 246, 0.4)',
+          color: 'rgba(22, 163, 74, 0.4)',
           width: 1,
           style: LineStyle.Dashed,
-          labelBackgroundColor: '#3b82f6',
+          labelBackgroundColor: '#16a34a',
         },
       },
       rightPriceScale: {
-        borderColor: 'rgba(255, 255, 255, 0.06)',
+        borderColor: 'rgba(0, 0, 0, 0.08)',
         scaleMargins: { top: 0.05, bottom: 0.25 },
       },
       timeScale: {
-        borderColor: 'rgba(255, 255, 255, 0.06)',
+        borderColor: 'rgba(0, 0, 0, 0.08)',
         timeVisible: true,
         secondsVisible: true,
         rightOffset: 3,
@@ -72,12 +72,12 @@ export function LiveChart({ symbol, onSymbolChange }: LiveChartProps) {
     });
 
     const candleSeries = chart.addCandlestickSeries({
-      upColor: '#10b981',
-      downColor: '#ef4444',
-      borderUpColor: '#10b981',
-      borderDownColor: '#ef4444',
-      wickUpColor: '#10b981',
-      wickDownColor: '#ef4444',
+      upColor: '#16a34a',
+      downColor: '#dc2626',
+      borderUpColor: '#16a34a',
+      borderDownColor: '#dc2626',
+      wickUpColor: '#16a34a',
+      wickDownColor: '#dc2626',
     });
 
     const volSeries = chart.addHistogramSeries({
@@ -146,7 +146,7 @@ export function LiveChart({ symbol, onSymbolChange }: LiveChartProps) {
     const vols: HistogramData[] = data.map((d) => ({
       time: (d.time / 1000) as Time,
       value: d.volume,
-      color: d.close >= d.open ? 'rgba(16, 185, 129, 0.35)' : 'rgba(239, 68, 68, 0.35)',
+      color: d.close >= d.open ? 'rgba(22, 163, 74, 0.3)' : 'rgba(220, 38, 38, 0.3)',
     }));
 
     candleSeriesRef.current.setData(candles);

@@ -44,7 +44,7 @@
   appearance: none;
   -webkit-appearance: none;
   padding-right: 28px;
-  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7280' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%234b5563' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
 }
@@ -105,7 +105,7 @@
 
 .error-message {
   background: var(--red-dim);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  border: 1px solid rgba(220, 38, 38, 0.25);
   color: var(--red);
   padding: 10px 16px;
   border-radius: var(--radius-sm);
@@ -158,11 +158,11 @@
 }
 
 .ohlc-legend-val.up {
-  color: #10b981;
+  color: #16a34a;
 }
 
 .ohlc-legend-val.down {
-  color: #ef4444;
+  color: #dc2626;
 }
 
 .ohlc-legend-change {
@@ -174,13 +174,13 @@
 }
 
 .ohlc-legend-change.up {
-  color: #10b981;
-  background: rgba(16, 185, 129, 0.12);
+  color: #16a34a;
+  background: rgba(22, 163, 74, 0.1);
 }
 
 .ohlc-legend-change.down {
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.1);
 }
 
 .ohlc-legend-vol {
