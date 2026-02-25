@@ -145,28 +145,90 @@
 
 /* ---- Charts ---- */
 
-.charts-section {
+.tv-chart-section {
+  position: relative;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* ---- OHLC Legend Overlay ---- */
+
+.ohlc-legend {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  z-index: 10;
   display: flex;
-  flex-direction: column;
-  gap: 16px;
+  align-items: center;
+  gap: 4px;
+  font-family: 'JetBrains Mono', 'SF Mono', monospace;
+  font-size: 12px;
+  line-height: 1;
+  pointer-events: none;
+  flex-wrap: wrap;
 }
 
-.price-chart-wrapper {
-  height: 420px;
-  position: relative;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 12px;
+.ohlc-legend-symbol {
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 13px;
+  margin-right: 6px;
 }
 
-.volume-chart-wrapper {
-  height: 160px;
-  position: relative;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 12px;
+.ohlc-legend-label {
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-left: 4px;
+}
+
+.ohlc-legend-val {
+  font-weight: 600;
+}
+
+.ohlc-legend-val.up {
+  color: #10b981;
+}
+
+.ohlc-legend-val.down {
+  color: #ef4444;
+}
+
+.ohlc-legend-change {
+  font-weight: 600;
+  margin-left: 6px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+.ohlc-legend-change.up {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.ohlc-legend-change.down {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.ohlc-legend-vol {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.tv-chart-container {
+  width: 100%;
+  height: 520px;
+}
+
+.tv-chart-placeholder {
+  width: 100%;
+  height: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .loading,
@@ -270,11 +332,8 @@
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .price-chart-wrapper {
-    height: 300px;
-  }
-
-  .volume-chart-wrapper {
-    height: 120px;
+  .tv-chart-container,
+  .tv-chart-placeholder {
+    height: 380px;
   }
 }

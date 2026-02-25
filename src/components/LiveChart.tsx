@@ -1,251 +1,230 @@
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from 'react';
 import {
-	Chart as ChartJS,
-	CategoryScale,
-	LinearScale,
-	PointElement,
-	LineElement,
-	Title,
-	Tooltip,
-	Legend,
-	Filler,
-} from "chart.js";
-import type { ChartOptions } from "chart.js";
-import { Line } from "react-chartjs-2";
-import { useLiveData } from "../hooks/useLiveData";
-import { SYMBOLS } from "../types";
-import "./LiveChart.css";
-
-ChartJS.register(
-	CategoryScale,
-	LinearScale,
-	PointElement,
-	LineElement,
-	Title,
-	Tooltip,
-	Legend,
-	Filler,
-);
+  createChart,
+  CrosshairMode,
+  ColorType,
+  LineStyle,
+} from 'lightweight-charts';
+import type { IChartApi, ISeriesApi, CandlestickData, HistogramData, Time, MouseEventParams } from 'lightweight-charts';
+import { useLiveData } from '../hooks/useLiveData';
+import { SYMBOLS } from '../types';
+import './LiveChart.css';
 
 interface LiveChartProps {
-	symbol: string;
-	onSymbolChange: (symbol: string) => void;
+  symbol: string;
+  onSymbolChange: (symbol: string) => void;
 }
 
 export function LiveChart({ symbol, onSymbolChange }: LiveChartProps) {
-	const { data, isConnected, error, lastCandle, clearData, reconnect } =
-		useLiveData(symbol);
-	const chartRef = useRef<ChartJS<"line">>(null);
+  const { data, isConnected, error, clearData, reconnect } = useLiveData(symbol);
 
-	useEffect(() => {
-		if (chartRef.current && data.length > 0) {
-			const chart = chartRef.current;
-			chart.data.labels = data.map((d) => {
-				const date = new Date(d.time);
-				return date.toLocaleTimeString();
-			});
-			chart.data.datasets[0].data = data.map((d) => d.close);
-			chart.data.datasets[1].data = data.map((d) => d.high);
-			chart.data.datasets[2].data = data.map((d) => d.low);
-			chart.update("none");
-		}
-	}, [data]);
+  const [ohlcLegend, setOhlcLegend] = useState<{ o: number; h: number; l: number; c: number; v: number; change: number } | null>(null);
 
-	const chartData = {
-		labels: data.map((d) => {
-			const date = new Date(d.time);
-			return date.toLocaleTimeString();
-		}),
-		datasets: [
-			{
-				label: "Close",
-				data: data.map((d) => d.close),
-				borderColor: "#3b82f6",
-				backgroundColor: "rgba(59, 130, 246, 0.08)",
-				tension: 0.3,
-				fill: true,
-				pointRadius: 0,
-				borderWidth: 2,
-			},
-			{
-				label: "High",
-				data: data.map((d) => d.high),
-				borderColor: "rgba(16, 185, 129, 0.4)",
-				backgroundColor: "transparent",
-				tension: 0.3,
-				fill: false,
-				pointRadius: 0,
-				borderWidth: 1,
-				borderDash: [4, 4],
-			},
-			{
-				label: "Low",
-				data: data.map((d) => d.low),
-				borderColor: "rgba(239, 68, 68, 0.4)",
-				backgroundColor: "transparent",
-				tension: 0.3,
-				fill: false,
-				pointRadius: 0,
-				borderWidth: 1,
-				borderDash: [4, 4],
-			},
-		],
-	};
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const chartRef = useRef<IChartApi | null>(null);
+  const candleSeriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
+  const volumeSeriesRef = useRef<ISeriesApi<'Histogram'> | null>(null);
+  const dataRef = useRef(data);
+  dataRef.current = data;
 
-	const options: ChartOptions<"line"> = {
-		responsive: true,
-		maintainAspectRatio: false,
-		animation: false,
-		interaction: {
-			intersect: false,
-			mode: "index",
-		},
-		plugins: {
-			legend: {
-				position: "top" as const,
-				labels: {
-					color: "#9ca3af",
-					font: { family: "'Inter', sans-serif", size: 12 },
-					padding: 16,
-					usePointStyle: true,
-					pointStyleWidth: 8,
-				},
-			},
-			title: {
-				display: false,
-			},
-			tooltip: {
-				backgroundColor: "rgba(22, 22, 37, 0.95)",
-				borderColor: "rgba(255,255,255,0.08)",
-				borderWidth: 1,
-				titleFont: { family: "'Inter', sans-serif", size: 12 },
-				bodyFont: { family: "'JetBrains Mono', monospace", size: 12 },
-				padding: 12,
-				cornerRadius: 8,
-				callbacks: {
-					label: (context) => {
-						const y = context.parsed.y;
-						if (y == null) return "";
-						return ` ${context.dataset.label}: $${y.toFixed(2)}`;
-					},
-				},
-			},
-		},
-		scales: {
-			x: {
-				display: true,
-				title: {
-					display: false,
-				},
-				ticks: {
-					maxTicksLimit: 10,
-					color: "#6b7280",
-					font: { size: 11 },
-				},
-				grid: {
-					color: "rgba(255, 255, 255, 0.04)",
-				},
-				border: { color: "rgba(255,255,255,0.06)" },
-			},
-			y: {
-				display: true,
-				title: {
-					display: true,
-					text: "Price (USD)",
-					color: "#6b7280",
-					font: { size: 11, family: "'Inter', sans-serif" },
-				},
-				ticks: {
-					color: "#6b7280",
-					font: { size: 11, family: "'JetBrains Mono', monospace" },
-				},
-				grid: {
-					color: "rgba(255, 255, 255, 0.04)",
-				},
-				border: { color: "rgba(255,255,255,0.06)" },
-			},
-		},
-	};
+  // Create chart once
+  useEffect(() => {
+    if (!chartContainerRef.current) return;
 
-	return (
-		<div className="live-chart-container">
-			<div className="chart-header">
-				<div className="symbol-selector">
-					<label htmlFor="live-symbol">Symbol:</label>
-					<select
-						id="live-symbol"
-						value={symbol}
-						onChange={(e) => onSymbolChange(e.target.value)}
-					>
-						{SYMBOLS.map((s) => (
-							<option key={s} value={s}>
-								{s}
-							</option>
-						))}
-					</select>
-				</div>
-				<div className="connection-status">
-					<span
-						className={`status-dot ${isConnected ? "connected" : "disconnected"}`}
-					/>
-					<span>{isConnected ? "Connected" : "Disconnected"}</span>
-				</div>
-				<div className="chart-actions">
-					<button onClick={clearData} className="btn btn-secondary">
-						Clear
-					</button>
-					{!isConnected && (
-						<button onClick={reconnect} className="btn btn-primary">
-							Reconnect
-						</button>
-					)}
-				</div>
-			</div>
+    const chart = createChart(chartContainerRef.current, {
+      layout: {
+        background: { type: ColorType.Solid, color: 'transparent' },
+        textColor: '#9ca3af',
+        fontFamily: "'Inter', -apple-system, sans-serif",
+        fontSize: 12,
+      },
+      grid: {
+        vertLines: { color: 'rgba(255, 255, 255, 0.04)', style: LineStyle.Dotted },
+        horzLines: { color: 'rgba(255, 255, 255, 0.04)', style: LineStyle.Dotted },
+      },
+      crosshair: {
+        mode: CrosshairMode.Normal,
+        vertLine: {
+          color: 'rgba(59, 130, 246, 0.4)',
+          width: 1,
+          style: LineStyle.Dashed,
+          labelBackgroundColor: '#3b82f6',
+        },
+        horzLine: {
+          color: 'rgba(59, 130, 246, 0.4)',
+          width: 1,
+          style: LineStyle.Dashed,
+          labelBackgroundColor: '#3b82f6',
+        },
+      },
+      rightPriceScale: {
+        borderColor: 'rgba(255, 255, 255, 0.06)',
+        scaleMargins: { top: 0.05, bottom: 0.25 },
+      },
+      timeScale: {
+        borderColor: 'rgba(255, 255, 255, 0.06)',
+        timeVisible: true,
+        secondsVisible: true,
+        rightOffset: 3,
+        barSpacing: 6,
+      },
+      handleScroll: { vertTouchDrag: false },
+    });
 
-			{error && <div className="error-message">{error}</div>}
+    const candleSeries = chart.addCandlestickSeries({
+      upColor: '#10b981',
+      downColor: '#ef4444',
+      borderUpColor: '#10b981',
+      borderDownColor: '#ef4444',
+      wickUpColor: '#10b981',
+      wickDownColor: '#ef4444',
+    });
 
-			{lastCandle && (
-				<div className="last-trade">
-					<div className="ohlc-item">
-						<span className="ohlc-label">Open</span>
-						<span className="ohlc-value open">${lastCandle.open.toFixed(2)}</span>
-					</div>
-					<div className="ohlc-item">
-						<span className="ohlc-label">High</span>
-						<span className="ohlc-value high">${lastCandle.high.toFixed(2)}</span>
-					</div>
-					<div className="ohlc-item">
-						<span className="ohlc-label">Low</span>
-						<span className="ohlc-value low">${lastCandle.low.toFixed(2)}</span>
-					</div>
-					<div className="ohlc-item">
-						<span className="ohlc-label">Close</span>
-						<span className="ohlc-value close">${lastCandle.close.toFixed(2)}</span>
-					</div>
-					<div className="ohlc-item ohlc-meta">
-						<span className="ohlc-label">Volume</span>
-						<span className="ohlc-value">{lastCandle.volume.toFixed(4)}</span>
-					</div>
-					<div className="ohlc-item ohlc-meta">
-						<span className="ohlc-label">Trades</span>
-						<span className="ohlc-value">{lastCandle.tradeCount.toLocaleString()}</span>
-					</div>
-				</div>
-			)}
+    const volSeries = chart.addHistogramSeries({
+      priceFormat: { type: 'volume' },
+      priceScaleId: '',
+    });
+    volSeries.priceScale().applyOptions({
+      scaleMargins: { top: 0.8, bottom: 0 },
+    });
 
-			<div className="chart-wrapper">
-				{data.length === 0 ? (
-					<div className="no-data">
-						{isConnected ? "Waiting for data..." : "Not connected"}
-					</div>
-				) : (
-					<Line ref={chartRef} data={chartData} options={options} />
-				)}
-			</div>
+    chartRef.current = chart;
+    candleSeriesRef.current = candleSeries;
+    volumeSeriesRef.current = volSeries;
 
-			<div className="chart-footer">
-				<span>Data points: {data.length}</span>
-			</div>
-		</div>
-	);
+    chart.subscribeCrosshairMove((param: MouseEventParams) => {
+      if (!param.time || !param.seriesData) {
+        const d = dataRef.current;
+        if (d.length > 0) {
+          const last = d[d.length - 1];
+          setOhlcLegend({ o: last.open, h: last.high, l: last.low, c: last.close, v: last.volume, change: ((last.close - last.open) / last.open) * 100 });
+        }
+        return;
+      }
+      const candleVal = param.seriesData.get(candleSeries) as CandlestickData | undefined;
+      const volVal = param.seriesData.get(volSeries) as HistogramData | undefined;
+      if (candleVal) {
+        setOhlcLegend({
+          o: candleVal.open, h: candleVal.high, l: candleVal.low, c: candleVal.close,
+          v: volVal?.value ?? 0,
+          change: ((candleVal.close - candleVal.open) / candleVal.open) * 100,
+        });
+      }
+    });
+
+    const ro = new ResizeObserver(() => {
+      if (chartContainerRef.current) {
+        chart.applyOptions({
+          width: chartContainerRef.current.clientWidth,
+          height: chartContainerRef.current.clientHeight,
+        });
+      }
+    });
+    ro.observe(chartContainerRef.current);
+
+    return () => {
+      ro.disconnect();
+      chart.remove();
+      chartRef.current = null;
+      candleSeriesRef.current = null;
+      volumeSeriesRef.current = null;
+    };
+  }, []);
+
+  // Update data on each tick
+  useEffect(() => {
+    if (!candleSeriesRef.current || !volumeSeriesRef.current || data.length === 0) return;
+
+    const candles: CandlestickData[] = data.map((d) => ({
+      time: (d.time / 1000) as Time,
+      open: d.open,
+      high: d.high,
+      low: d.low,
+      close: d.close,
+    }));
+
+    const vols: HistogramData[] = data.map((d) => ({
+      time: (d.time / 1000) as Time,
+      value: d.volume,
+      color: d.close >= d.open ? 'rgba(16, 185, 129, 0.35)' : 'rgba(239, 68, 68, 0.35)',
+    }));
+
+    candleSeriesRef.current.setData(candles);
+    volumeSeriesRef.current.setData(vols);
+
+    // Auto-scroll to the latest bar
+    chartRef.current?.timeScale().scrollToRealTime();
+
+    // Update legend to last candle
+    const last = data[data.length - 1];
+    setOhlcLegend({ o: last.open, h: last.high, l: last.low, c: last.close, v: last.volume, change: ((last.close - last.open) / last.open) * 100 });
+  }, [data]);
+
+  return (
+    <div className="live-chart-container">
+      <div className="chart-header">
+        <div className="symbol-selector">
+          <label htmlFor="live-symbol">Symbol:</label>
+          <select
+            id="live-symbol"
+            value={symbol}
+            onChange={(e) => onSymbolChange(e.target.value)}
+          >
+            {SYMBOLS.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
+        <div className="connection-status">
+          <span className={`status-dot ${isConnected ? 'connected' : 'disconnected'}`} />
+          <span>{isConnected ? 'Connected' : 'Disconnected'}</span>
+        </div>
+        <div className="chart-actions">
+          <button onClick={clearData} className="btn btn-secondary">Clear</button>
+          {!isConnected && (
+            <button onClick={reconnect} className="btn btn-primary">Reconnect</button>
+          )}
+        </div>
+      </div>
+
+      {error && <div className="error-message">{error}</div>}
+
+      <div className="tv-chart-section">
+        {ohlcLegend && data.length > 0 && (
+          <div className="ohlc-legend">
+            <span className="ohlc-legend-symbol">{symbol}</span>
+            <span className="ohlc-legend-label">O</span>
+            <span className={`ohlc-legend-val ${ohlcLegend.c >= ohlcLegend.o ? 'up' : 'down'}`}>{ohlcLegend.o.toFixed(2)}</span>
+            <span className="ohlc-legend-label">H</span>
+            <span className={`ohlc-legend-val ${ohlcLegend.c >= ohlcLegend.o ? 'up' : 'down'}`}>{ohlcLegend.h.toFixed(2)}</span>
+            <span className="ohlc-legend-label">L</span>
+            <span className={`ohlc-legend-val ${ohlcLegend.c >= ohlcLegend.o ? 'up' : 'down'}`}>{ohlcLegend.l.toFixed(2)}</span>
+            <span className="ohlc-legend-label">C</span>
+            <span className={`ohlc-legend-val ${ohlcLegend.c >= ohlcLegend.o ? 'up' : 'down'}`}>{ohlcLegend.c.toFixed(2)}</span>
+            <span className={`ohlc-legend-change ${ohlcLegend.change >= 0 ? 'up' : 'down'}`}>
+              {ohlcLegend.change >= 0 ? '+' : ''}{ohlcLegend.change.toFixed(2)}%
+            </span>
+            <span className="ohlc-legend-label">Vol</span>
+            <span className="ohlc-legend-vol">{ohlcLegend.v.toLocaleString(undefined, { maximumFractionDigits: 4 })}</span>
+          </div>
+        )}
+        {data.length === 0 ? (
+          <div className="tv-chart-placeholder">
+            <div className="no-data">
+              {isConnected ? 'Waiting for data...' : 'Not connected'}
+            </div>
+          </div>
+        ) : null}
+        <div
+          ref={chartContainerRef}
+          className="tv-chart-container"
+          style={{ display: data.length === 0 ? 'none' : 'block' }}
+        />
+      </div>
+
+      <div className="chart-footer">
+        <span>Data points: {data.length}</span>
+      </div>
+    </div>
+  );
 }

@@ -44,7 +44,7 @@ function App() {
       </main>
 
       <footer className="app-footer">
-        <span>Data provided by Binance API &bull; Built with React &amp; Chart.js</span>
+        <span>Data provided by Binance API &bull; Built with React &amp; TradingView Charts</span>
       </footer>
     </div>
   );
